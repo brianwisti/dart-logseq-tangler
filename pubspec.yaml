@@ -13,4 +13,5 @@ dev_dependencies:
   lints: ^2.0.0
   test: ^1.16.0
 dependencies:
+  contextual_logging: ^1.0.2+1
   dart_markdown: ^3.1.4

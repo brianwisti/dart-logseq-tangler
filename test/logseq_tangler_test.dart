@@ -1,9 +1,24 @@
 import 'package:logseq_tangler/logseq_tangler.dart';
 import 'package:test/test.dart';
+import 'package:dart_markdown/dart_markdown.dart';
 
 void main() {
   group('CodeBlock', () {
     final List<String> emptyLines = [];
+    final markdown = Markdown();
+
+    group('fromFencedCodeBlock()', () {
+      BlockElement extractFirstBlock(String rawText) =>
+          markdown.parse(rawText)[0] as BlockElement;
+
+      test('not a code block', () {
+        final rawText = '*Hello* World!';
+        final block = extractFirstBlock(rawText);
+
+        expect(() => CodeBlock.fromFencedCodeBlock(block),
+            throwsA(isA<WrongBlockElementType>()));
+      });
+    });
 
     group('toMarkdown()', () {
       test('no lines with no language', () {

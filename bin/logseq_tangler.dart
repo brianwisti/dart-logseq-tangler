@@ -7,7 +7,7 @@ void showNodeBreakdown(Node node) {
   if (node is BlockElement) {
     if (node.type == "fencedCodeBlock") {
       print(node.type);
-      final codeBlock = LogseqCodeBlock.fromFencedCodeBlock(node);
+      final codeBlock = logseq_tangler.CodeBlock.fromFencedCodeBlock(node);
       print(codeBlock.toMarkdown());
     }
 
@@ -27,6 +27,6 @@ void main(List<String> arguments) async {
     final nodes = markdown.parse(contents);
     nodes.forEach(showNodeBreakdown);
   } catch (e) {
-    stderr.writeln('failed to read file: \n${e}');
+    stderr.writeln('failed to read file: \n$e');
   }
 }
