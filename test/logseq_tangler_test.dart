@@ -11,6 +11,15 @@ void main() {
       BlockElement extractFirstBlock(String rawText) =>
           markdown.parse(rawText)[0] as BlockElement;
 
+      test('python, hello world', () {
+        final rawText = '```python\nprint("Hello World!")\n```';
+        final fencedCodeBlock = extractFirstBlock(rawText);
+        final block = CodeBlock.fromFencedCodeBlock(fencedCodeBlock);
+
+        expect(block.language, 'python');
+        expect(block.lines, ['print("Hello World!")\n']);
+      });
+
       test('not a code block', () {
         final rawText = '*Hello* World!';
         final block = extractFirstBlock(rawText);
