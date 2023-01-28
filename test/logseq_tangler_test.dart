@@ -2,10 +2,11 @@ import 'package:logseq_tangler/logseq_tangler.dart';
 import 'package:test/test.dart';
 import 'package:dart_markdown/dart_markdown.dart';
 
+final markdown = Markdown();
+
 void main() {
   group('CodeBlock', () {
     final List<String> emptyLines = [];
-    final markdown = Markdown();
 
     group('fromFencedCodeBlock()', () {
       BlockElement extractFirstBlock(String rawText) =>
@@ -60,6 +61,54 @@ void main() {
         final block = CodeBlock(language: 'dart', lines: lines);
 
         expect(block.toMarkdown(), '```dart\n${lines.join()}```\n');
+      });
+    });
+  });
+
+  group('Getting CodeBlocks from Markdown', () {
+    test('with no code blocks', () {
+      final rawText = 'Hello World!';
+      final codeBlocks = codeBlocksFromMarkdownText(rawText);
+
+      expect(codeBlocks.isEmpty, true);
+    });
+
+    test('Code block at the top level', () {
+      final rawText = '```python\nprint("Hello World!")\n```\n';
+      final codeBlocks = codeBlocksFromMarkdownText(rawText);
+      expect(codeBlocks.length, 1);
+      expect(codeBlocks[0].toMarkdown(), rawText);
+    });
+
+    test('Code block in top-level list item', () {
+      final rawText = '- ```python\n  print("Hello World!")\n  ```\n';
+      final codeBlocks = codeBlocksFromMarkdownText(rawText);
+
+      expect(codeBlocks.length, 1);
+
+      // Check that code block ignores indentation from bullet list
+      final asFencedCode = codeBlocks[0].toMarkdown();
+      expect(asFencedCode.contains('\nprint("Hello World!")\n'), true);
+    });
+  });
+
+  group('LogseqNode', () {
+    test('fromString()', () {
+      final rawText = '-';
+      final logseqNode = LogseqNode.fromString(text: rawText);
+
+      expect(logseqNode.text, rawText);
+      expect(logseqNode.codeBlocks.isEmpty, true);
+    });
+
+    group('codeBlocks', () {
+      test('with a single fenced code block', () {
+        final rawText = '''- ```python
+  print("Hello, World!")
+  ```
+''';
+        final logseqNode = LogseqNode.fromString(text: rawText);
+        expect(logseqNode.codeBlocks.length, 1);
       });
     });
   });
