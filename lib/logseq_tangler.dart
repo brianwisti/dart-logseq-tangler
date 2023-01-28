@@ -1,12 +1,12 @@
 import 'package:dart_markdown/dart_markdown.dart';
 
-class LogseqCodeBlock {
+class CodeBlock {
   String? language;
   late List<String> lines;
 
-  LogseqCodeBlock({this.language, required this.lines});
+  CodeBlock({this.language, required this.lines});
 
-  LogseqCodeBlock.fromFencedCodeBlock(BlockElement block) {
+  CodeBlock.fromFencedCodeBlock(BlockElement block) {
     this.language = block.markers[0].text.replaceAll('```', '');
     this.lines =
         block.children.cast<Text>().map((Text line) => line.text).toList();
