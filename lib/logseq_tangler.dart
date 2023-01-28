@@ -1,10 +1,20 @@
-class NodeProperty {
-  final String name;
-  final String rawValue;
+import 'package:dart_markdown/dart_markdown.dart';
 
-  const NodeProperty(this.name, this.rawValue);
-}
+class LogseqCodeBlock {
+  String? language;
+  late List<String> lines;
 
-int calculate() {
-  return 6 * 7;
+  LogseqCodeBlock({this.language, required this.lines});
+
+  LogseqCodeBlock.fromFencedCodeBlock(BlockElement block) {
+    this.language = block.markers[0].text.replaceAll('```', '');
+    this.lines =
+        block.children.cast<Text>().map((Text line) => line.text).toList();
+  }
+
+  String toMarkdown() {
+    final codeLines = this.lines.join();
+    final language = this.language ?? '';
+    return '```${language}\n${codeLines}```\n';
+  }
 }
