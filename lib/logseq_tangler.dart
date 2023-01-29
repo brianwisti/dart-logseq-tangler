@@ -7,6 +7,17 @@ class WrongBlockElementType implements Exception {
   String error() => 'BlockElement must be a fenced code block';
 }
 
+class TangleMarker {
+  final String directive;
+  final int lineIndex;
+  final String indentPrefix;
+
+  const TangleMarker(
+      {required this.directive,
+      required this.lineIndex,
+      this.indentPrefix = ''});
+}
+
 class CodeBlock with ContextualLogger {
   String? language;
   late List<String> lines;
@@ -23,6 +34,10 @@ class CodeBlock with ContextualLogger {
 
     language = block.markers[0].text.replaceAll('```', '');
     lines = block.children.cast<Text>().map((Text line) => line.text).toList();
+  }
+
+  bool get hasTangleDirectives {
+    return false;
   }
 
   String toMarkdown() {

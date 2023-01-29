@@ -63,6 +63,27 @@ void main() {
         expect(block.toMarkdown(), '```dart\n${lines.join()}```\n');
       });
     });
+
+    group('tangle directives', () {
+      test('without any directives', () {
+        final lines = [
+          'print("Hello World!")\n',
+        ];
+        final codeBlock = CodeBlock(language: 'python', lines: lines);
+
+        expect(codeBlock.hasTangleDirectives, false);
+      });
+
+      test('identifying file blocks', () {
+        final lines = [
+          '#- file:hello.py\n',
+          'print("Hello World!")\n',
+        ];
+        final codeBlock = CodeBlock(language: 'python', lines: lines);
+
+        expect(codeBlock.hasTangleDirectives, true);
+      });
+    });
   });
 
   group('Getting CodeBlocks from Markdown', () {
