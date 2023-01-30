@@ -5,6 +5,54 @@ import 'package:dart_markdown/dart_markdown.dart';
 final markdown = Markdown();
 
 void main() {
+  group('textHoldsTangleMarker', () {
+    test('Python code without a marker', () {
+      final rawText = 'print("Hello World!")\n';
+
+      expect(textHoldsTangleMarker(rawText, 'python'), false);
+    });
+
+    test('Python code with a filenameMarker', () {
+      final rawText = '#- file:hello.py';
+
+      expect(textHoldsTangleMarker(rawText, 'python'), true);
+    });
+
+    test('Dart code without a marker', () {
+      final rawText = 'void main() {';
+
+      expect(textHoldsTangleMarker(rawText, 'dart'), false);
+    });
+
+    test('Dart code with a filenameMarker', () {
+      final rawText = '//- file:hello.dart';
+
+      expect(textHoldsTangleMarker(rawText, 'dart'), true);
+    });
+
+    test('Unkown language without a marker', () {
+      final rawText = 'Hello World';
+
+      expect(textHoldsTangleMarker(rawText, 'text'), false);
+    });
+
+    test('Unknown language with a filenameMarker and default prefix', () {
+      final rawText = '#- hello.txt';
+
+      expect(textHoldsTangleMarker(rawText, 'text'), true);
+    });
+  });
+
+  group('TangleMarker.fromCodeLine', () {
+    test('Python code with a filenameMarker', () {
+      final rawText = '#- file:hello.py';
+      final tangleMarker = TangleMarker.fromCodeLine(
+          fullText: rawText, language: 'python', lineIndex: 0);
+
+      expect(tangleMarker.fullText, rawText);
+    });
+  });
+
   group('CodeBlock', () {
     final List<String> emptyLines = [];
 
@@ -71,7 +119,7 @@ void main() {
         ];
         final codeBlock = CodeBlock(language: 'python', lines: lines);
 
-        expect(codeBlock.hasTangleDirectives, false);
+        expect(codeBlock.hasTangleMarkers, false);
       });
 
       test('identifying file blocks', () {
@@ -81,7 +129,7 @@ void main() {
         ];
         final codeBlock = CodeBlock(language: 'python', lines: lines);
 
-        expect(codeBlock.hasTangleDirectives, true);
+        expect(codeBlock.hasTangleMarkers, true);
       });
     });
   });

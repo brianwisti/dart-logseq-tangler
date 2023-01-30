@@ -2,20 +2,65 @@ import 'package:dart_markdown/dart_markdown.dart';
 import 'package:contextual_logging/contextual_logging.dart';
 
 const codeBlockType = 'fencedCodeBlock';
+const defaultMarkerPrefix = '#';
+const languageLineComment = {
+  'python': '#',
+  'dart': '//',
+};
 
-class WrongBlockElementType implements Exception {
-  String error() => 'BlockElement must be a fenced code block';
+enum TangleMarkerType {
+  filenameMarker,
 }
 
 class TangleMarker {
-  final String directive;
-  final int lineIndex;
-  final String indentPrefix;
+  final String fullText; // '#- file:hello.py'
+  final String language; // 'python'
+  late String markerText; // 'hello.py'
+  late TangleMarkerType markerType; // filenameMarker
+  final int lineIndex; // 0
+  final String indentPrefix; // ''
 
-  const TangleMarker(
-      {required this.directive,
+  TangleMarker(
+      {required this.fullText,
+      required this.language,
+      required this.markerText,
+      required this.markerType,
       required this.lineIndex,
       this.indentPrefix = ''});
+
+  TangleMarker.fromCodeLine(
+      {required this.fullText,
+      required this.language,
+      required this.lineIndex,
+      this.indentPrefix = ''}) {
+    String markerPrefix;
+
+    if (languageLineComment.containsKey(language)) {
+      markerPrefix = '${languageLineComment[language]}- ';
+    } else {
+      markerPrefix = '$defaultMarkerPrefix- ';
+    }
+
+    String rawMarkerText = fullText.replaceFirst(markerPrefix, '');
+    markerText = rawMarkerText.replaceFirst('file:', '');
+    markerType = TangleMarkerType.filenameMarker;
+  }
+}
+
+bool textHoldsTangleMarker(String text, String language) {
+  String markerPrefix;
+
+  if (languageLineComment.containsKey(language)) {
+    markerPrefix = '${languageLineComment[language]}- ';
+  } else {
+    markerPrefix = '$defaultMarkerPrefix- ';
+  }
+
+  return text.startsWith(markerPrefix);
+}
+
+class WrongBlockElementType implements Exception {
+  String error() => 'BlockElement must be a fenced code block';
 }
 
 class CodeBlock with ContextualLogger {
@@ -36,7 +81,13 @@ class CodeBlock with ContextualLogger {
     lines = block.children.cast<Text>().map((Text line) => line.text).toList();
   }
 
-  bool get hasTangleDirectives {
+  bool get hasTangleMarkers {
+    final directivePrefix = '#-';
+
+    if (lines.any((element) => element.startsWith(directivePrefix))) {
+      return true;
+    }
+
     return false;
   }
 
